@@ -33,7 +33,7 @@ class Game:
         while True:
             self.display.fill((14, 219, 248))
             self.tilemap.render(self.display)
-            self.player.update((self.movement[1] - self.movement[0], 0))
+            self.player.update(self.tilemap, (self.movement[1] - self.movement[0], 0))
             self.player.render(self.display)
 
             for event in pygame.event.get():

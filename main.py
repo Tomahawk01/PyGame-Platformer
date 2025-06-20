@@ -23,18 +23,26 @@ class Game:
             "large_decor": load_images("tiles/large_decor"),
             "stone": load_images("tiles/stone"),
             "player": load_image("entities/player.png"),
+            "background": load_image("background.png"),
         }
 
         self.player = PhysicsEntity(self, "player", (50, 50), (8, 15))
 
         self.tilemap = Tilemap(self, 16)
 
+        self.scroll = [0, 0]
+
     def run(self):
         while True:
-            self.display.fill((14, 219, 248))
-            self.tilemap.render(self.display)
+            self.display.blit(self.assets["background"], (0, 0))
+
+            self.scroll[0] += (self.player.rect().centerx - self.display.get_width() / 2 - self.scroll[0]) / 30
+            self.scroll[1] += (self.player.rect().centery - self.display.get_height() / 2 - self.scroll[1]) / 30
+            render_scroll = (int(self.scroll[0]), int(self.scroll[1]))
+
+            self.tilemap.render(self.display, render_scroll)
             self.player.update(self.tilemap, (self.movement[1] - self.movement[0], 0))
-            self.player.render(self.display)
+            self.player.render(self.display, render_scroll)
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -45,6 +53,8 @@ class Game:
                         self.movement[0] = True
                     if event.key == pygame.K_RIGHT:
                         self.movement[1] = True
+                    if event.key == pygame.K_UP:
+                        self.player.velocity[1] = -3
                 if event.type == pygame.KEYUP:
                     if event.key == pygame.K_LEFT:
                         self.movement[0] = False

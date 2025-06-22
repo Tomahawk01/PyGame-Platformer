@@ -1,10 +1,14 @@
 import sys
+import math
+import random
+
 import pygame
 
 from src.utils import *
 from src.entities import PhysicsEntity, Player
 from src.tilemap import Tilemap
 from src.clouds import Clouds
+from src.particle import Particle
 
 class Game:
     def __init__(self):
@@ -30,7 +34,8 @@ class Game:
             "player/run": Animation(load_images("entities/player/run"), 4),
             "player/jump": Animation(load_images("entities/player/jump")),
             "player/slide": Animation(load_images("entities/player/slide")),
-            "player/wall_slide": Animation(load_images("entities/player/wall_slide"))
+            "player/wall_slide": Animation(load_images("entities/player/wall_slide")),
+            "particle/leaf": Animation(load_images("particles/leaf"), 20, False),
         }
 
         self.clouds = Clouds(self.assets["clouds"], 16)
@@ -39,6 +44,12 @@ class Game:
 
         self.tilemap = Tilemap(self, 16)
         self.tilemap.load("map.json")
+
+        self.leaf_spawners = []
+        for tree in self.tilemap.extract([("large_decor", 2)], True):
+            self.leaf_spawners.append(pygame.Rect(4 + tree["pos"][0], 4 + tree["pos"][1], 23, 13))
+        
+        self.particles = []
 
         self.scroll = [0, 0]
 
@@ -50,12 +61,25 @@ class Game:
             self.scroll[1] += (self.player.rect().centery - self.display.get_height() / 2 - self.scroll[1]) / 30
             render_scroll = (int(self.scroll[0]), int(self.scroll[1]))
 
+            for rect in self.leaf_spawners:
+                if random.random() * 49999 < rect.width * rect.height:
+                    pos = (rect.x + random.random() * rect.width, rect.y + random.random() * rect.height)
+                    self.particles.append(Particle(self, "leaf", pos, [-0.1, 0.3], random.randint(0, 20)))
+
             self.clouds.update()
             self.clouds.render(self.display, render_scroll)
 
             self.tilemap.render(self.display, render_scroll)
             self.player.update(self.tilemap, (self.movement[1] - self.movement[0], 0))
             self.player.render(self.display, render_scroll)
+
+            for particle in self.particles.copy():
+                kill = particle.update()
+                particle.render(self.display, render_scroll)
+                if particle.type == "leaf":
+                    particle.pos[0] += math.sin(particle.animation.frame * 0.035) * 0.3
+                if kill:
+                    self.particles.remove(particle)
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:

@@ -36,6 +36,7 @@ class Game:
             "player/slide": Animation(load_images("entities/player/slide")),
             "player/wall_slide": Animation(load_images("entities/player/wall_slide")),
             "particle/leaf": Animation(load_images("particles/leaf"), 20, False),
+            "particle/particle": Animation(load_images("particles/particle"), 6, False),
         }
 
         self.clouds = Clouds(self.assets["clouds"], 16)
@@ -92,6 +93,8 @@ class Game:
                         self.movement[1] = True
                     if event.key == pygame.K_UP:
                         self.player.jump()
+                    if event.key == pygame.K_z:
+                        self.player.dash()
                 if event.type == pygame.KEYUP:
                     if event.key == pygame.K_LEFT:
                         self.movement[0] = False

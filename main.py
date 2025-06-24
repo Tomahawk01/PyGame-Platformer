@@ -39,6 +39,7 @@ class Game:
             "player/wall_slide": Animation(load_images("entities/player/wall_slide")),
             "particle/leaf": Animation(load_images("particles/leaf"), 20, False),
             "particle/particle": Animation(load_images("particles/particle"), 6, False),
+            "gun": load_image("gun.png"),
         }
 
         self.clouds = Clouds(self.assets["clouds"], 16)

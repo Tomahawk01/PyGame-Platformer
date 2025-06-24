@@ -29,7 +29,7 @@ class Editor:
         self.tilemap = Tilemap(self, 16)
 
         try:
-            self.tilemap.load("map.json")
+            self.tilemap.load("data/maps/0.json")
         except FileNotFoundError:
             pass
 

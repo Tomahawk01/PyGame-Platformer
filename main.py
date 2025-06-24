@@ -5,7 +5,7 @@ import random
 import pygame
 
 from src.utils import *
-from src.entities import PhysicsEntity, Player
+from src.entities import Player, Enemy
 from src.tilemap import Tilemap
 from src.clouds import Clouds
 from src.particle import Particle
@@ -30,6 +30,8 @@ class Game:
             "player": load_image("entities/player.png"),
             "background": load_image("background.png"),
             "clouds": load_images("clouds"),
+            "enemy/idle": Animation(load_images("entities/enemy/idle"), 6),
+            "enemy/run": Animation(load_images("entities/enemy/run"), 4),
             "player/idle": Animation(load_images("entities/player/idle"), 6),
             "player/run": Animation(load_images("entities/player/run"), 4),
             "player/jump": Animation(load_images("entities/player/jump")),
@@ -49,6 +51,13 @@ class Game:
         self.leaf_spawners = []
         for tree in self.tilemap.extract([("large_decor", 2)], True):
             self.leaf_spawners.append(pygame.Rect(4 + tree["pos"][0], 4 + tree["pos"][1], 23, 13))
+        
+        self.enemies = []
+        for spawner in self.tilemap.extract([("spawners", 0), ("spawners", 1)]):
+            if spawner["variant"] == 0:
+                self.player.pos = spawner["pos"]
+            else:
+                self.enemies.append(Enemy(self, spawner["pos"], (8, 15)))
         
         self.particles = []
 
@@ -71,6 +80,11 @@ class Game:
             self.clouds.render(self.display, render_scroll)
 
             self.tilemap.render(self.display, render_scroll)
+
+            for enemy in self.enemies.copy():
+                enemy.update(self.tilemap, (0, 0))
+                enemy.render(self.display, render_scroll)
+
             self.player.update(self.tilemap, (self.movement[1] - self.movement[0], 0))
             self.player.render(self.display, render_scroll)
 
@@ -91,7 +105,7 @@ class Game:
                         self.movement[0] = True
                     if event.key == pygame.K_RIGHT:
                         self.movement[1] = True
-                    if event.key == pygame.K_UP:
+                    if event.key == pygame.K_x:
                         self.player.jump()
                     if event.key == pygame.K_z:
                         self.player.dash()

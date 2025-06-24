@@ -9,6 +9,7 @@ from src.entities import Player, Enemy
 from src.tilemap import Tilemap
 from src.clouds import Clouds
 from src.particle import Particle
+from src.spark import Spark
 
 class Game:
     def __init__(self):
@@ -48,7 +49,7 @@ class Game:
         self.player = Player(self, (50, 50), (8, 15))
 
         self.tilemap = Tilemap(self, 16)
-        
+
         self.load_level(0)
 
     def load_level(self, map_id):
@@ -67,6 +68,7 @@ class Game:
         
         self.projectiles = []
         self.particles = []
+        self.sparks = []
 
         self.scroll = [0, 0]
 
@@ -102,11 +104,24 @@ class Game:
                 self.display.blit(img, (projectile[0][0] - img.get_width() / 2 - render_scroll[0], projectile[0][1] - img.get_height() / 2 - render_scroll[1]))
                 if self.tilemap.solid_check(projectile[0]):
                     self.projectiles.remove(projectile)
+                    for i in range(4):
+                        self.sparks.append(Spark(projectile[0], random.random() - 0.5 + (math.pi if projectile[1] > 0 else 0), 2 + random.random()))
                 elif projectile[2] > 360:
                     self.projectiles.remove(projectile)
                 elif abs(self.player.dashing) < 50:
                     if self.player.rect().collidepoint(projectile[0]):
-                       self.projectiles.remove(projectile) 
+                       self.projectiles.remove(projectile)
+                       for i in range(30):
+                           angle = random.random() * math.pi * 2
+                           speed = random.random() * 5
+                           self.sparks.append(Spark(self.player.rect().center, angle, 2 + random.random()))
+                           self.particles.append(Particle(self, "particle", self.player.rect().center, [math.cos(angle + math.pi) * speed * 0.5, math.sin(angle + math.pi) * speed * 0.5], random.randint(0, 7)))
+
+            for spark in self.sparks.copy():
+                kill = spark.update()
+                spark.render(self.display, render_scroll)
+                if kill:
+                    self.sparks.remove(spark)
 
             for particle in self.particles.copy():
                 kill = particle.update()

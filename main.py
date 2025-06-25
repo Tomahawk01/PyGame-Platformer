@@ -17,7 +17,8 @@ class Game:
         pygame.init()
         pygame.display.set_caption("Platformer Game")
 
-        self.window = pygame.display.set_mode((640, 480))
+        # self.window = pygame.display.set_mode((640, 480))
+        self.window = pygame.display.set_mode((1280, 960))
         self.display = pygame.Surface((320, 240), pygame.SRCALPHA)
         self.display_2 = pygame.Surface((320, 240))
 
